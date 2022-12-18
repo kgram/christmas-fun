@@ -1,0 +1,10 @@
+include ../layout.pug
++base
+	+head("What you see is what you get...")
+		style.
+			.view {
+				margin: 20px 0;
+			}
+	+body
+		each view in views
+			.view !{view}

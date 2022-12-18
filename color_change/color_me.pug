@@ -1,0 +1,156 @@
+include ../layout.pug
++base
+	+head("Well, color me surprised...")
+		style.
+			.content {
+				display: flex;
+			}
+			.smiley {
+				margin: 30px 60px;
+				border-radius: 50%;
+				color: gray;
+				background-color: currentColor;
+				transition: color 2s ease-out;
+			}
+			.smiley > img {
+				display: block;
+				width: 200px;
+				height: 200px;
+				pointer-events: none;
+			}
+			.text {
+				visibility: hidden;
+				opacity: 0;
+				transition: opacity 1s;
+			}
+			.text.show {
+				visibility: visible;
+				opacity: 1;
+			}
+	+body
+		h1 Well, #[span(style="color:hsl(0, 100%, 50%)") color] #[span(style="color:hsl(120, 100%, 25%)") me] #[span(style="color:hsl(240, 100%, 50%)") surprised]!
+		.content
+			.smiley#smiley1
+				img
+			.smiley#smiley2
+				img
+			.smiley#smiley3
+				img
+		div
+			div(id="solution" class=isSolved ? 'text show' : 'text')
+				h3 Congrats!
+				a(href="/this") Now go on, get outta here...
+		script.
+			const sources = {
+				sad: "/assets/smileys/sad.svg",
+				disappointed: "/assets/smileys/disappointed.svg",
+				shocked: "/assets/smileys/shocked.svg",
+				happy: "/assets/smileys/happy.svg",
+			}
+			const setSmiley = (smiley, type) => {
+				const image = smiley.querySelector('img')
+				image.src = sources[type]
+			}
+			const parseRGB = (string) => {
+				const [, r, g, b] = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(string)
+				return [parseInt(r, 10), parseInt(g, 10), parseInt(b, 10)]
+			}
+			const RGBToHSL = ([r, g, b]) => {
+				r /= 255, g /= 255, b /= 255;
+
+				var max = Math.max(r, g, b), min = Math.min(r, g, b);
+				var h, s, l = (max + min) / 2;
+
+				if (max == min) {
+					h = s = 0; // achromatic
+				} else {
+					var d = max - min;
+					s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+					switch (max) {
+					case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+					case g: h = (b - r) / d + 2; break;
+					case b: h = (r - g) / d + 4; break;
+					}
+
+					h /= 6;
+				}
+
+				return [
+					h * 360,
+					s * 100,
+					l * 100,
+				];
+			};
+			const getColor = (element) => {
+				const color = window.getComputedStyle(element).color
+				return RGBToHSL(parseRGB(color))
+			}
+			const getColorDiff = (a, b) => {
+				let hueDiff = Math.abs(a[0] - b[0])
+				if (hueDiff > 180) hueDiff = 360 - hueDiff
+				const satDiff = Math.abs(a[1] - b[1])
+				const litDiff = Math.abs(a[2] - b[2])
+
+				return Math.max(0, Math.min(hueDiff / 50 + satDiff / 30 + litDiff / 40, 1))
+			}
+			let smileys = [
+				{
+					element: smiley1,
+					targetColor: [0, 100, 50],
+					color: #{isSolved ? '[0, 100, 50]' : '[271, 76, 53]'},
+					face: #{isSolved ? "'happy'" : "'sad'"},
+				},
+				{
+					element: smiley2,
+					targetColor: [120, 100, 25],
+					color: #{isSolved ? '[120, 100, 25]' : '[217, 59, 78]'},
+					face: #{isSolved ? "'happy'" : "'sad'"},
+				},
+				{
+					element: smiley3,
+					targetColor: [240, 100, 50],
+					color: #{isSolved ? '[240, 100, 50]' : '[43, 74, 49]'},
+					face: #{isSolved ? "'happy'" : "'sad'"},
+				},
+			]
+			smileys.forEach(({ element, color, face }) => {
+				element.style.color = `hsl(${color[0]}, ${color[1]}%, ${color[2]}%)`
+				setSmiley(element, face)
+			})
+			let reportedSolved = #{isSolved ? "true" : "false"}
+			setInterval(() => {
+				smileys = smileys.map(({ element, color: prevColor, targetColor }) => {
+					const nextColor = getColor(element)
+
+					const targetDiff = getColorDiff(nextColor, targetColor)
+					const prevDiff = getColorDiff(nextColor, prevColor)
+
+					let face
+
+					if (targetDiff < 1) {
+						face = 'happy'
+					} else if (prevDiff > 0.1) {
+						face = 'shocked'
+					} else {
+						face = 'sad'
+					}
+
+					setSmiley(element, face)
+
+					return {
+						element,
+						targetColor,
+						color: nextColor,
+						face,
+					}
+				})
+				const isSolved = smileys.every(({ face }) => face === 'happy')
+
+				solution.classList.toggle('show', isSolved)
+
+				if (isSolved && !reportedSolved) {
+					fetch('/color/me/solved', { method: 'POST' })
+					reportedSolved = true
+				}
+			}, 200)

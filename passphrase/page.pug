@@ -1,0 +1,43 @@
+include ../layout.pug
++base
+	+head("What do you know?")
+		style.
+			#answer {
+				width: 600px;
+				height: 400px;
+				resize: none;
+				border: 3px solid #716bb9;
+				border-radius: 8px;
+				margin: 10px 0;
+			}
+			button {
+				background-color: #716bb9;
+				color: white;
+				border: none;
+				padding: 8px 32px;
+				border-radius: 16px;
+				margin: 20px 0;
+			}
+
+	+body
+		form#form
+			h1 What is the most important thing to know in this company?
+			h3 Take care to answer, you'll only get one shot!
+			p The response is evaluated by a sophisticated AI to determine if you truly <em>understand</em> this company
+			textarea#answer
+			div
+				button I'm certain!
+
+		#result
+
+		script.
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault()
+				console.log('answer', answer.value)
+				const response = await fetch('/certainly/this', {
+					method: 'POST',
+					body: answer.value,
+				})
+				result.innerHTML = await response.text()
+				form.remove()
+			})

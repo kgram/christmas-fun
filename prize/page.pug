@@ -1,0 +1,39 @@
+include ../layout.pug
++base
+	+head("Congrats!")
+		style.
+			.banner {
+				max-width: 100%;
+				width: 1200px;
+				margin: 32px 0 64px;
+			}
+			.logo {
+				width: 32px;
+				border-radius: 50%;
+				border: 2px solid currentColor;
+			}
+			.prize {
+				max-width: 100%;
+				min-width: 320px;
+				display: flex;
+				align-items: center;
+				gap: 8px;border: 2px solid #716bb9;
+				padding: 4px;
+				border-radius: 24px;
+				color: #716bb9;
+			}
+			.key {
+				flex-grow: 1;
+				font-family: monospace;
+				font-size: 22px;
+			}
+	+body
+		h1 You made it to the end
+		p Your prize? Only an amazing game to keep you entertained all christmas (or like, whenever)!
+
+		a(href="https://gangbeasts.game/" target="_blank" rel="noopener noreferrer")
+			img.banner(src="https://images.squarespace-cdn.com/content/v1/5628f502e4b06b50e9430925/1610028603675-VUROJGH4BX2DLYPOO51K/Website+Header+01.png?format=2500w")
+
+		.prize
+			img.logo(src="/assets/steam.svg")
+			.key= key
