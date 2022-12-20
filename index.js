@@ -18,6 +18,10 @@ import { notFound } from './notFound/index.js'
 import { prize } from './prize/index.js'
 import { device } from './device/index.js'
 
+console.log('Starting app...')
+
+const port = process.env.PORT ?? 8080
+
 const app = new Koa()
 
 app.use(async (ctx, next) => {
@@ -53,4 +57,6 @@ app.use(prize({ key: process.env.PRIZE_KEY }))
 
 app.use(notFound())
 
-app.listen(process.env.PORT ?? 8080)
+app.listen(port, () => {
+	console.log(`Listening on :${port}`)
+})
