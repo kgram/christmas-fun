@@ -4,6 +4,10 @@ import compose from 'koa-compose'
 export function auth({ key: keyCorrect }) {
 	const router = new Router()
 
+	router.get('/healthcheck', (ctx) => {
+		ctx.status = 200
+	})
+
 	router.get('/begin/:keyAttempt', ctx => {
 		if (ctx.params.keyAttempt === keyCorrect) {
 			ctx.session.authenticated = true
