@@ -26,9 +26,13 @@ const app = new Koa()
 
 app.use(async (ctx, next) => {
 	const start = Date.now();
+	let logEnabled = true
+	ctx.noLog = () => { logEnabled = false }
 	await next();
-	const { isMobile, browser, version } = ctx.userAgent
-	console.info(`${ctx.method} ${ctx.href} ${Date.now() - start}ms ${ctx.status} "${browser}${isMobile ? '[m]' : ''} ${version}"`);
+	if (logEnabled) {
+		const { isMobile, browser, version } = ctx.userAgent
+		console.info(`${ctx.method} ${ctx.href} ${Date.now() - start}ms ${ctx.status} "${browser}${isMobile ? '[m]' : ''} ${version}"`);
+	}
 });
 
 app.keys = [process.env.SESSION_KEY]

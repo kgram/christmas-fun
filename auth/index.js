@@ -5,6 +5,7 @@ export function auth({ key: keyCorrect }) {
 	const router = new Router()
 
 	router.get('/healthcheck', (ctx) => {
+		ctx.noLog()
 		ctx.status = 200
 	})
 
